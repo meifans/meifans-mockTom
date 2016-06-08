@@ -11,8 +11,8 @@ import java.net.Socket;
 public class HttpServer {
 
     // System.getProperty("user.dir") return is the root path of project.
-    public static final String WEB_ROOT = System.getProperty("user.dir") + File.separator + "src" + File.separator
-            + "main" + File.separator + "resources";
+    public static final String WEB_ROOT = System.getProperty("user.dir") + File.separator;
+    // + "src" + File.separator + "main" + File.separator + "resources";
 
     // shutdown command
     private static final String SHUTDOWN_COMMAND = "/godie";

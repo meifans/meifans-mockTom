@@ -20,6 +20,8 @@ public class HttpServer {
     // the shutdown command received
     private boolean shutdown = false;
 
+    private int loopTimes = 1;
+
     public static void main(String[] args) {
         HttpServer server = new HttpServer();
         server.await();
@@ -42,6 +44,8 @@ public class HttpServer {
             OutputStream output = null;
             try {
                 socket = serverSocket.accept();
+                System.out.println("第" + loopTimes++ + "次循环");
+                System.out.println("socket:" + socket);
                 input = socket.getInputStream();
                 output = socket.getOutputStream();
 
@@ -54,11 +58,14 @@ public class HttpServer {
                 response.setRequest(request);
 
                 // check if this is a request for a servlet or a static resource
+
                 // a request for a servlet begins with "/servlet/"
+
                 if (request.getUri().startsWith("/servlet/")) {
                     ServletProcessor processor = new ServletProcessor();
                     processor.process(request, response);
                 } else {
+                    System.out.println("else??");
                     StaticResourceProcessor processor = new StaticResourceProcessor();
                     processor.process(request, response);
                 }

@@ -18,7 +18,7 @@ public class Request implements ServletRequest {
     private InputStream input;
 
     public Request(InputStream input) {
-        input = this.input;
+        this.input = input;
     }
 
     public String getUri() {
@@ -39,7 +39,8 @@ public class Request implements ServletRequest {
         for (int j = 0; j < i; j++) {
             request.append((char) buffer[j]);
         }
-        System.out.println("request:" + request.toString());
+        System.out.println("buffer:" + request.toString());
+        System.out.println("are you ok ?");
         uri = praseUri(request.toString());
 
     }
@@ -52,7 +53,7 @@ public class Request implements ServletRequest {
             if (index2 > index1)
                 return requestString.substring(index1, index2);
         }
-        return null;
+        return "";
     }
 
     public Object getAttribute(String arg0) {

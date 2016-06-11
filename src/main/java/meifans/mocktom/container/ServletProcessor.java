@@ -14,6 +14,7 @@ public class ServletProcessor {
 
     @SuppressWarnings("rawtypes")
     public void process(Request request, Response response) {
+        System.out.println("come into process !");
         String uri = request.getUri();
         // remember form of URI is /servlet/servletName
         String servletName = uri.substring(uri.lastIndexOf("/") + 1);
@@ -45,9 +46,12 @@ public class ServletProcessor {
         }
 
         Servlet servlet = null;
+        // 外观类，保证parse()与getUri()安全
+        RequestFacade requestFacade = new RequestFacade(request);
+        ResponseFacade responseFacade = new ResponseFacade(response);
         try {
             servlet = (Servlet) myClass.newInstance();
-            servlet.service((ServletRequest) request, (ServletResponse) response);
+            servlet.service((ServletRequest) requestFacade, (ServletResponse) responseFacade);
         } catch (Exception e) {
             System.out.println(e.toString());
         } catch (Throwable e) {

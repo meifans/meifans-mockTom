@@ -19,11 +19,11 @@ public class Response implements ServletResponse {
     PrintWriter writer;
 
     public Response(OutputStream output) {
-        output = this.output;
+        this.output = output;
     }
 
     public void setRequest(Request request) {
-        request = this.request;
+        this.request = request;
     }
 
     // this method is used to serve static pages

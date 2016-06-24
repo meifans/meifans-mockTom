@@ -31,7 +31,7 @@ public class ResponseFacade implements ServletResponse {
 
     public PrintWriter getWriter() throws IOException {
 
-        return null;
+        return response.getWriter();
     }
 
     public void setCharacterEncoding(String s) {

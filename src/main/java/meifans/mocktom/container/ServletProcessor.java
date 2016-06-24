@@ -10,11 +10,12 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import meifans.mocktom.comstants.Constants;
+
 public class ServletProcessor {
 
     @SuppressWarnings("rawtypes")
     public void process(Request request, Response response) {
-        System.out.println("come into process !");
         String uri = request.getUri();
         // remember form of URI is /servlet/servletName
         String servletName = uri.substring(uri.lastIndexOf("/") + 1);
@@ -23,7 +24,8 @@ public class ServletProcessor {
             // create a URLClassLoader
             URL[] urls = new URL[1];
             URLStreamHandler streamHandler = null;
-            File classPath = new File(HttpServer.WEB_ROOT);
+            File classPath = new File(Constants.SERVLET);
+
             // the forming of repository is taken from
             // the createClassLoader method in
             // org.apache.catelina.startup.ClassLoaderFactory
@@ -36,13 +38,13 @@ public class ServletProcessor {
             loader = new URLClassLoader(urls);
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println(e.toString());
         }
         Class myClass = null;
         try {
             myClass = loader.loadClass(servletName);
+
         } catch (ClassNotFoundException e) {
-            System.out.println(e.toString());
+            e.printStackTrace();
         }
 
         Servlet servlet = null;

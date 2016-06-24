@@ -1,6 +1,5 @@
 package meifans.mocktom.container;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -9,10 +8,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class HttpServer {
-
-    // System.getProperty("user.dir") return is the root path of project.
-    public static final String WEB_ROOT = System.getProperty("user.dir") + File.separator;
-    // + "src" + File.separator + "main" + File.separator + "resources";
 
     // shutdown command
     private static final String SHUTDOWN_COMMAND = "/godie";
@@ -31,6 +26,7 @@ public class HttpServer {
         ServerSocket serverSocket = null;
         int port = 8080;
         try {
+            System.out.println("await start");
             serverSocket = new ServerSocket(port, 1, InetAddress.getByName("127.0.0.1"));
         } catch (IOException e) {
             e.printStackTrace();
@@ -60,17 +56,18 @@ public class HttpServer {
                 // check if this is a request for a servlet or a static resource
 
                 // a request for a servlet begins with "/servlet/"
-
                 if (request.getUri().startsWith("/servlet/")) {
                     ServletProcessor processor = new ServletProcessor();
                     processor.process(request, response);
-                } else {
-                    System.out.println("else??");
+                } else if (!request.getUri().isEmpty()) {
+                    System.out.println("Uri:" + request.getUri());
                     StaticResourceProcessor processor = new StaticResourceProcessor();
                     processor.process(request, response);
+
                 }
                 // close the socket
                 socket.close();
+                System.out.println("socket close");
                 // check if the previous URI is a shutdown command
                 shutdown = request.getUri().equals(SHUTDOWN_COMMAND);
             } catch (IOException e) {

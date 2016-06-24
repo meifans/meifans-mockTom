@@ -40,7 +40,6 @@ public class Request implements ServletRequest {
             request.append((char) buffer[j]);
         }
         System.out.println("buffer:" + request.toString());
-        System.out.println("are you ok ?");
         uri = praseUri(request.toString());
 
     }
@@ -51,7 +50,7 @@ public class Request implements ServletRequest {
         if (index1 != -1) {
             index2 = requestString.indexOf(' ', index1 + 1);
             if (index2 > index1)
-                return requestString.substring(index1, index2);
+                return requestString.substring(index1 + 1, index2);
         }
         return "";
     }

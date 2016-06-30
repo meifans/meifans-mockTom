@@ -11,6 +11,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import meifans.mocktom.comstants.Constants;
+import meifans.mocktom.connector.http.HttpRequest;
+import meifans.mocktom.connector.http.HttpResponse;
 
 public class ServletProcessor {
 
@@ -59,6 +61,11 @@ public class ServletProcessor {
         } catch (Throwable e) {
             System.out.println(e.toString());
         }
+
+    }
+
+    public void process(HttpRequest request, HttpResponse response) {
+        // TODO Auto-generated method stub
 
     }
 }

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import javax.servlet.ServletException;
+
 import org.apache.tomcat.util.res.StringManager;
 
 import meifans.mocktom.container.ServletProcessor;
@@ -12,15 +14,17 @@ import meifans.mocktom.container.StaticResourceProcessor;
 public class HttpProcessor {
 
     private HttpConnector connector;
-
     private HttpRequest request;
-
     private HttpResponse response;
+    private HttpRequestLine requestLine = new HttpRequestLine();
+
+    private static final String MATCH_SESSION_ID = ";jsessionid=";
 
     /**
      * This string manager for this package
      */
-    protected StringManager sm = StringManager.getManager("meifans.mocktom.connector.http");
+    protected StringManager sm = StringManager
+            .getManager("meifans.mocktom.connector.http");
 
     public HttpProcessor(HttpConnector connector) {
         this.connector = connector;
@@ -36,11 +40,10 @@ public class HttpProcessor {
             request = new HttpRequest(input);
             response = new HttpResponse(output);
             response.setRequest(request);
-
             response.setHeader("Server", "mockTom Servlet container");
 
             parseRequest(input, output);
-            pareResponse(input);
+            pareHeaders(input);
 
             // check if this is a request for a servlet or a static resource
             // a request for a servlet begin with "/servlet/"
@@ -55,17 +58,106 @@ public class HttpProcessor {
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (ServletException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
 
-    private void pareResponse(SocketInputStream input) {
-        // TODO Auto-generated method stub
+    /**
+     * @param input
+     * @param output
+     * @throws Exception
+     * @throws ServletException
+     */
+    private void parseRequest(SocketInputStream input, OutputStream output)
+            throws Exception, ServletException {
+
+        // Parse the incoming request line
+        input.readRequestLine(requestLine);
+        String method = new String(requestLine.method, 0,
+                requestLine.methodEnd);
+        String uri = null;
+        String protocol = new String(requestLine.protocol, 0,
+                requestLine.protocolEnd);
+
+        // Validate the incoming request line
+        if (method.length() < 1) {
+            throw new ServletException("Missing HTTP request method ");
+        } else if (requestLine.uriEnd < 1) {
+            throw new ServletException("Missing HTTP request URI");
+        }
+        // Parse any query parameters out of the request URI
+        int question = requestLine.indexOf("?");
+        if (question >= 0) {
+            request.setQueryString(new String(requestLine.uri, question + 1,
+                    requestLine.uriEnd));
+            uri = new String(requestLine.uri, 0, question);
+        } else {
+            request.setQueryString(null);
+            uri = new String(requestLine.uri, 0, requestLine.uriEnd);
+        }
+
+        // Checking for an absolute URI (with the HTTP protocol)
+        if (!uri.startsWith("/")) {
+            int pos = uri.indexOf("://");
+            // Prase out protocol and host name
+            if (pos != -1) {
+                pos = uri.indexOf('/', pos + 3);
+                if (pos == -1) {
+                    uri = "";
+                } else {
+                    uri = uri.substring(pos);
+                }
+            }
+        }
+
+        // Parse any requested session Id out of request URI
+        int semicolon = uri.indexOf(MATCH_SESSION_ID);
+        if (semicolon >= 0) {
+            String rest = uri.substring(semicolon + MATCH_SESSION_ID.length());
+            int semicolon2 = rest.indexOf(';');
+            if (semicolon2 > 0) {
+                request.setRequestedSessionId(rest.substring(0, semicolon2));
+                rest = rest.substring(semicolon2);
+            } else {
+                request.setRequestedSessionId(rest);
+                rest = "";
+            }
+            request.setRequestedSessionURL(true);
+            uri = uri.substring(0, semicolon) + rest;
+        } else {
+            request.setRequestedSessionId(null);
+            request.setRequestedSesssionURL(false);
+        }
+
+        // Normalize URI (using String operation at the moment)
+        String normalizedUri = normalize(uri);
+        // Set the corresponding request properties.
+        // Transition protect set HttpRequest's properties,not subclass's.
+        // If it have.
+        ((HttpRequest) request).setMethod(method);
+        request.setProtocol(protocol); // I also can't understand this ...
+        if (normalizedUri != null) {
+            ((HttpRequest) request).setRequestURI(normalizedUri);
+        } else {
+            ((HttpRequest) request).setRequestURI(uri);
+        }
+
+        if (normalizedUri == null) {
+            throw new ServletException("Invalid URI:" + uri + "'");
+        }
+    }
+
+    private String normalize(String uri) {
+
+        return null;
+    }
+
+    private void pareHeaders(SocketInputStream input) {
 
     }
 
-    private void parseRequest(SocketInputStream input, OutputStream output) {
-        // TODO Auto-generated method stub
-
-    }
 }

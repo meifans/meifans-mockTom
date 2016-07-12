@@ -31,7 +31,8 @@ public class PrimitiveServlet implements Servlet {
         System.out.println("come into init!");
     }
 
-    public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
+    public void service(ServletRequest request, ServletResponse response)
+            throws ServletException, IOException {
         System.out.println("come into service!");
         PrintWriter out = response.getWriter();
         out.println("ok,it belong to PrintWriter!");

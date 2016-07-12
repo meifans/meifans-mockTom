@@ -13,4 +13,8 @@ public class SocketInputStream extends InputStream {
         return 0;
     }
 
+    public void readRequestLine(HttpRequestLine requestLine) {
+
+    }
+
 }

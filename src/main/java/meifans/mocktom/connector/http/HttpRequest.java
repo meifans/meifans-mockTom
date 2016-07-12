@@ -154,13 +154,42 @@ public class HttpRequest implements ServletRequest {
 
     }
 
-    public void setCharacterEncoding(String arg0) throws UnsupportedEncodingException {
+    public void setCharacterEncoding(String arg0)
+            throws UnsupportedEncodingException {
 
     }
 
     public String getRequestURI() {
-        // TODO Auto-generated method stub
+
         return null;
+    }
+
+    public void setQueryString(String string) {
+
+    }
+
+    public void setRequestedSessionId(String substring) {
+
+    }
+
+    public void setRequestedSessionURL(boolean b) {
+
+    }
+
+    public void setRequestedSesssionURL(boolean b) {
+
+    }
+
+    public void setMethod(String method) {
+
+    }
+
+    public void setProtocol(String protocol) {
+
+    }
+
+    public void setRequestURI(String normalizedUri) {
+
     }
 
 }

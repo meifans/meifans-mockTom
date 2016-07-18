@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
+import javax.servlet.http.Cookie;
 
 public class HttpRequest implements ServletRequest {
 
@@ -189,6 +190,31 @@ public class HttpRequest implements ServletRequest {
     }
 
     public void setRequestURI(String normalizedUri) {
+
+    }
+
+    public void addHeader(String name, String value) {
+
+    }
+
+    public boolean isRequestedSessionIdFromCookie() {
+        return false;
+    }
+
+    public void setRequestedSessionCookie(boolean b) {
+
+    }
+
+    public void addCookie(Cookie cookie) {
+
+    }
+
+    public void setContentLength(int n) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void setContentType(String value) {
 
     }
 

@@ -5,11 +5,13 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 
 import org.apache.tomcat.util.res.StringManager;
 
 import meifans.mocktom.container.ServletProcessor;
 import meifans.mocktom.container.StaticResourceProcessor;
+import meifans.mocktom.util.RequestUtil;
 
 public class HttpProcessor {
 
@@ -156,8 +158,51 @@ public class HttpProcessor {
         return null;
     }
 
-    private void pareHeaders(SocketInputStream input) {
-
+    private void pareHeaders(SocketInputStream input)
+            throws IOException, ServletException {
+        while (true) {
+            HttpHeader header = new HttpHeader();
+            // Read the next header
+            input.readHeader(header);
+            if (header.nameEnd == 0) {
+                if (header.valueEnd == 0) {
+                    return;
+                } else {
+                    throw new ServletException(
+                            sm.getString("httpProcessor.parseHeader.colon"));
+                }
+            }
+            String name = new String(header.name, 0, header.nameEnd);
+            String value = new String(header.value, 0, header.valueEnd);
+            request.addHeader(name, value);
+            // do something for some headers,ignore others.
+            if (name.equals("cookie")) {
+                Cookie cookies[] = RequestUtil.parseCookieHeader(value);
+                for (int i = 0; i < cookies.length; i++) {
+                    if (cookies[i].getName().equals("jsession")) {
+                        // Override anything requested in the URL
+                        if (!request.isRequestedSessionIdFromCookie()) {
+                            // Accept only the first session id cookie
+                            request.setRequestedSessionId(cookies[i].getValue());
+                            request.setRequestedSessionCookie(true);
+                            request.setRequestedSessionURL(false);
+                        }
+                    }
+                    request.addCookie(cookies[i]);
+                }
+            } else if (name.equals("content-length")) {
+                int n = -1;
+                try {
+                    n = Integer.parseInt(value);
+                } catch (Exception e) {
+                    throw new ServletException(
+                            sm.getString("httpProcessor.parseHeaders.contentLength"));
+                }
+                request.setContentLength(n);
+            } else if (name.equals("content-type")) {
+                request.setContentType(value);
+            }
+        } // end while
     }
 
 }

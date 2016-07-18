@@ -17,4 +17,9 @@ public class SocketInputStream extends InputStream {
 
     }
 
+    public void readHeader(HttpHeader header) {
+        // TODO Auto-generated method stub
+
+    }
+
 }

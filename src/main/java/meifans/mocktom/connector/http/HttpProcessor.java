@@ -79,11 +79,9 @@ public class HttpProcessor {
 
         // Parse the incoming request line
         input.readRequestLine(requestLine);
-        String method = new String(requestLine.method, 0,
-                requestLine.methodEnd);
+        String method = new String(requestLine.method, 0, requestLine.methodEnd);
         String uri = null;
-        String protocol = new String(requestLine.protocol, 0,
-                requestLine.protocolEnd);
+        String protocol = new String(requestLine.protocol, 0, requestLine.protocolEnd);
 
         // Validate the incoming request line
         if (method.length() < 1) {

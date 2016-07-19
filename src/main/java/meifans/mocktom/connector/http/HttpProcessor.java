@@ -151,9 +151,67 @@ public class HttpProcessor {
         }
     }
 
-    private String normalize(String uri) {
+    private String normalize(String path) {
+        if (path == null)
+            return null;
+        String normalized = path;
+        // Prevent encoding '%', '/', '.' and '\', which are special reserved
+        // characters
+        if ((normalized.indexOf("%25") >= 0)
+                || (normalized.indexOf("%2F") >= 0)
+                || (normalized.indexOf("%2E") >= 0)
+                || (normalized.indexOf("%5C") >= 0)
+                || (normalized.indexOf("%2f") >= 0)
+                || (normalized.indexOf("%2e") >= 0)
+                || (normalized.indexOf("%5c") >= 0)) {
+            return null;
+        }
+        if (normalized.startsWith("/%7E") || normalized.startsWith("/%7e"))
+            normalized = "/~" + normalized.substring(4);
+        if (normalized.equals("/."))
+            return "/";
 
-        return null;
+        normalized = normalized.replace('\\', '/');
+        if (!normalized.startsWith("/"))
+            normalized = "/" + normalized;
+        // Resolve occurrences of "//" in the normalized path
+        while (true) {
+            int index = normalized.indexOf("//");
+            if (index < 0)
+                break;
+            normalized = normalized.substring(0, index) +
+                    normalized.substring(index + 1);
+        }
+
+        // Resolve occurrences of "/./" in the normalized path
+        while (true) {
+            int index = normalized.indexOf("/./");
+            if (index < 0)
+                break;
+            normalized = normalized.substring(0, index) +
+                    normalized.substring(index + 2);
+        }
+
+        // Resolve occurrences of "/../" in the normalized path
+        while (true) {
+            int index = normalized.indexOf("/../");
+            if (index < 0)
+                break;
+            if (index == 0)
+                return (null); // Trying to go outside our context
+            int index2 = normalized.lastIndexOf('/', index - 1);
+            normalized = normalized.substring(0, index2) +
+                    normalized.substring(index + 3);
+        }
+
+        // Declare occurrences of "/..." (three or more dots) to be invalid
+        // (on some Windows platforms this walks the directory tree!!!)
+        if (normalized.indexOf("/...") >= 0)
+            return (null);
+
+        // Return the normalized path that we have completed
+        return (normalized);
+
     }
 
     private void pareHeaders(SocketInputStream input)

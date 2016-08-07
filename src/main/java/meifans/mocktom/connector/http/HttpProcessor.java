@@ -5,11 +5,17 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 
 import org.apache.tomcat.util.res.StringManager;
 
 import meifans.mocktom.container.ServletProcessor;
 import meifans.mocktom.container.StaticResourceProcessor;
+<<<<<<< HEAD
+=======
+import meifans.mocktom.util.RequestUtil;
+
+>>>>>>> 31bca996f3d8a371303f59e803fd66989e0d9e57
 public class HttpProcessor {
 
     private HttpConnector connector;
@@ -79,11 +85,9 @@ public class HttpProcessor {
 
         // Parse the incoming request line
         input.readRequestLine(requestLine);
-        String method = new String(requestLine.method, 0,
-                requestLine.methodEnd);
+        String method = new String(requestLine.method, 0, requestLine.methodEnd);
         String uri = null;
-        String protocol = new String(requestLine.protocol, 0,
-                requestLine.protocolEnd);
+        String protocol = new String(requestLine.protocol, 0, requestLine.protocolEnd);
 
         // Validate the incoming request line
         if (method.length() < 1) {
@@ -162,13 +166,114 @@ public class HttpProcessor {
         return uri;
     }
 
-    private String normalize(String uri) {
+    private String normalize(String path) {
+        if (path == null)
+            return null;
+        String normalized = path;
+        // Prevent encoding '%', '/', '.' and '\', which are special reserved
+        // characters
+        if ((normalized.indexOf("%25") >= 0)
+                || (normalized.indexOf("%2F") >= 0)
+                || (normalized.indexOf("%2E") >= 0)
+                || (normalized.indexOf("%5C") >= 0)
+                || (normalized.indexOf("%2f") >= 0)
+                || (normalized.indexOf("%2e") >= 0)
+                || (normalized.indexOf("%5c") >= 0)) {
+            return null;
+        }
+        if (normalized.startsWith("/%7E") || normalized.startsWith("/%7e"))
+            normalized = "/~" + normalized.substring(4);
+        if (normalized.equals("/."))
+            return "/";
 
-        return null;
+        normalized = normalized.replace('\\', '/');
+        if (!normalized.startsWith("/"))
+            normalized = "/" + normalized;
+        // Resolve occurrences of "//" in the normalized path
+        while (true) {
+            int index = normalized.indexOf("//");
+            if (index < 0)
+                break;
+            normalized = normalized.substring(0, index) +
+                    normalized.substring(index + 1);
+        }
+
+        // Resolve occurrences of "/./" in the normalized path
+        while (true) {
+            int index = normalized.indexOf("/./");
+            if (index < 0)
+                break;
+            normalized = normalized.substring(0, index) +
+                    normalized.substring(index + 2);
+        }
+
+        // Resolve occurrences of "/../" in the normalized path
+        while (true) {
+            int index = normalized.indexOf("/../");
+            if (index < 0)
+                break;
+            if (index == 0)
+                return (null); // Trying to go outside our context
+            int index2 = normalized.lastIndexOf('/', index - 1);
+            normalized = normalized.substring(0, index2) +
+                    normalized.substring(index + 3);
+        }
+
+        // Declare occurrences of "/..." (three or more dots) to be invalid
+        // (on some Windows platforms this walks the directory tree!!!)
+        if (normalized.indexOf("/...") >= 0)
+            return (null);
+
+        // Return the normalized path that we have completed
+        return (normalized);
+
     }
 
-    private void pareHeaders(SocketInputStream input) {
-
+    private void pareHeaders(SocketInputStream input)
+            throws IOException, ServletException {
+        while (true) {
+            HttpHeader header = new HttpHeader();
+            // Read the next header
+            input.readHeader(header);
+            if (header.nameEnd == 0) {
+                if (header.valueEnd == 0) {
+                    return;
+                } else {
+                    throw new ServletException(
+                            sm.getString("httpProcessor.parseHeader.colon"));
+                }
+            }
+            String name = new String(header.name, 0, header.nameEnd);
+            String value = new String(header.value, 0, header.valueEnd);
+            request.addHeader(name, value);
+            // do something for some headers,ignore others.
+            if (name.equals("cookie")) {
+                Cookie cookies[] = RequestUtil.parseCookieHeader(value);
+                for (int i = 0; i < cookies.length; i++) {
+                    if (cookies[i].getName().equals("jsession")) {
+                        // Override anything requested in the URL
+                        if (!request.isRequestedSessionIdFromCookie()) {
+                            // Accept only the first session id cookie
+                            request.setRequestedSessionId(cookies[i].getValue());
+                            request.setRequestedSessionCookie(true);
+                            request.setRequestedSessionURL(false);
+                        }
+                    }
+                    request.addCookie(cookies[i]);
+                }
+            } else if (name.equals("content-length")) {
+                int n = -1;
+                try {
+                    n = Integer.parseInt(value);
+                } catch (Exception e) {
+                    throw new ServletException(
+                            sm.getString("httpProcessor.parseHeaders.contentLength"));
+                }
+                request.setContentLength(n);
+            } else if (name.equals("content-type")) {
+                request.setContentType(value);
+            }
+        } // end while
     }
 
 }

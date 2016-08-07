@@ -10,8 +10,6 @@ import org.apache.tomcat.util.res.StringManager;
 
 import meifans.mocktom.container.ServletProcessor;
 import meifans.mocktom.container.StaticResourceProcessor;
-import org.jetbrains.annotations.NotNull;
-
 public class HttpProcessor {
 
     private HttpConnector connector;
@@ -28,9 +26,7 @@ public class HttpProcessor {
     protected StringManager sm = StringManager
             .getManager("meifans.mocktom.connector.http");
 
-    public HttpProcessor(HttpConnector connector) {
-        this.connector = connector;
-    }
+    public HttpProcessor(HttpConnector connector) {this.connector = connector;}
 
     public void process(Socket socket) {
         SocketInputStream input = null;

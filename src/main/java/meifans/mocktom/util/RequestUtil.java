@@ -33,7 +33,7 @@ public final class RequestUtil {
                 e.printStackTrace();
             }
         }
-        return  cookies.toArray(new Cookie[cookies.size()]);
+        return cookies.toArray(new Cookie[cookies.size()]);
     }
 
 }

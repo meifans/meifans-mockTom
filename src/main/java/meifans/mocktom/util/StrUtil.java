@@ -17,7 +17,6 @@ public final class StrUtil {
 		if (isBlank(source, target) || source.length < offset || start < 0
 					|| offset > target.length || (offset - start > target.length)) {
 			return -1;
-
 		}
 		int[] number = palindrome(target);
 		int i = 0, j = start, count = 0;

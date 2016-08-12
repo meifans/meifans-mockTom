@@ -20,7 +20,6 @@ public class HttpProcessor {
 	private HttpConnector connector;
 	private HttpRequest request;
 	private HttpResponse response;
-	// 没有完成
 	private HttpRequestLine requestLine = new HttpRequestLine();
 
 	public HttpProcessor(HttpConnector connector) {
@@ -35,7 +34,6 @@ public class HttpProcessor {
 			// 取得输入输出流
 			input = new SocketInputStream(socket.getInputStream(), 2048);
 			output = socket.getOutputStream();
-
 			// httpRequest和httpResponse没有完成
 			// 创建，初始化request与response对象
 			request = new HttpRequest(input);
@@ -118,6 +116,7 @@ public class HttpProcessor {
 
 		if (normalizedUri == null) {
 			throw new ServletException("Invalid URI:" + uri + "'");
+
 		}
 	}
 
@@ -143,6 +142,7 @@ public class HttpProcessor {
 		return uri;
 	}
 
+
 	private String parseParameters() {
 		String uri;// Parse any query parameters out of the request URI
 		int question = requestLine.indexOf("?");
@@ -155,6 +155,7 @@ public class HttpProcessor {
 		}
 		return uri;
 	}
+
 
 	private String normalize(String path) {
 		if (path == null)

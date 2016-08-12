@@ -31,24 +31,4 @@
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" assert-keyword="true" jdk-15="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
-  <component name="ValidationConfiguration">
-    <option name="VALIDATORS">
-      <map>
-        <entry key="EJB Validator" value="false" />
-        <entry key="Faces Validator" value="true" />
-        <entry key="FreeMarker" value="true" />
-        <entry key="Hibernate Validator" value="true" />
-        <entry key="JPA Validator" value="true" />
-        <entry key="Jasper Validator" value="true" />
-        <entry key="Spring Model Validator" value="true" />
-        <entry key="Spring Web Flow" value="true" />
-        <entry key="Struts 2 Model Validator" value="false" />
-        <entry key="Struts 2 Validation Model Validator" value="true" />
-        <entry key="Struts Model validator" value="true" />
-        <entry key="Struts Validation Model validator" value="true" />
-        <entry key="Tiles Model validator" value="true" />
-        <entry key="Web Xml Validator" value="true" />
-      </map>
-    </option>
-  </component>
 </project>

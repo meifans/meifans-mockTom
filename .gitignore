@@ -1,8 +1,9 @@
 /target/
-<<<<<<< HEAD
+
 .*.iml.*.idea.*
 .project
-=======
+
 *.idea
 *.classpath
->>>>>>> 361273f3f1968de11021ed176bd258788436e0f4
+
+/.idea/

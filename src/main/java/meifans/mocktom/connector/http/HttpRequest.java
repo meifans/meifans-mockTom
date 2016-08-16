@@ -14,6 +14,7 @@ import javax.servlet.http.Cookie;
 
 public class HttpRequest implements ServletRequest {
 
+
     public HttpRequest(SocketInputStream input) {
     }
 

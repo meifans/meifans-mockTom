@@ -27,6 +27,7 @@ public class HttpProcessor {
 	}
 
 	public void process(Socket socket) {
+
 		SocketInputStream input = null;
 		OutputStream output = null;
 		try {

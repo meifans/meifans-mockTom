@@ -42,6 +42,7 @@ public class HttpProcessor {
             response.setRequest(request);
             response.setHeader("Server", "mockTom Servlet container");
 
+
             parseRequest(input, output);
             pareHeaders(input);// 没有完成
 

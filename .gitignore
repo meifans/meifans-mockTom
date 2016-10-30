@@ -1,8 +1,49 @@
-/target/*
-*.iml.*.idea.*
-/.project/*
-/.idea/*
+*.class
 
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+*.iml
+*.log
+.idea/
 *.classpath
 *.project
+target/
 
+# maven ignore
+
+*.eclipse-pmd
+*target/
+!tools/*.jar
+*.war
+*.zip
+*.tar
+# *.tar.gz
+bin/
+build/
+ajcore.*
+
+# eclipse ignore
+*.settings/
+*.project
+*.classpath
+
+# idea ignore
+.idea/
+*.ipr
+*.iml
+*.iws
+
+# temp ignore
+*.log
+*.cache
+*.diff
+*.patch
+*.tmp

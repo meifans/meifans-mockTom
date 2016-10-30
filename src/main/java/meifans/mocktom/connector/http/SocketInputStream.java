@@ -7,6 +7,11 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * prase input stream to requestLine
+ *
+ * @author meifans
+ */
 public class SocketInputStream extends InputStream {
 
     private static final byte CR = (byte) '\r';
@@ -119,7 +124,7 @@ public class SocketInputStream extends InputStream {
         }
         requestLine.methodEnd = readCount - 1;
     }
-    
+
     private void readUri(HttpRequestLine requestLine) throws IOException {
         // Reading URI
         int maxRead = requestLine.uri.length;

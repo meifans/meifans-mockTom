@@ -38,7 +38,7 @@ final class HttpRequestLine {
 
 	/**
 	 * Release all object references,and initialize instance variables,in
-	 * preparation for reuse of  this object.
+	 * preparation for reuse of this object.
 	 */
 	public void recycle() {
 		methodEnd = 0;

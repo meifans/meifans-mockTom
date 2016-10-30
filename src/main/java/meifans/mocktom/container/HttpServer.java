@@ -7,6 +7,9 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * 1.2
+ */
 public class HttpServer {
 
     // shutdown command

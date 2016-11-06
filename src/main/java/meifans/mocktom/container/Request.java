@@ -1,5 +1,8 @@
 package meifans.mocktom.container;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,10 +10,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
-
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
 
 public class Request implements ServletRequest {
 
@@ -27,7 +26,7 @@ public class Request implements ServletRequest {
 
     public void prase() {
         // Read a set of characters from the socket
-        StringBuffer request = new StringBuffer(2048);
+        StringBuilder request = new StringBuilder(2048);
         int i;
         byte[] buffer = new byte[2048];
         try {

@@ -215,6 +215,12 @@ public class HttpProcessor {
 
     }
 
+	/**
+     * remember invoking parseRequest before invoking this.
+     * @param input
+     * @throws IOException
+     * @throws ServletException
+     */
     private void pareHeaders(SocketInputStream input) throws IOException, ServletException {
         while (true) {
             HttpHeader header = new HttpHeader();

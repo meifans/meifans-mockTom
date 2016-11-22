@@ -32,7 +32,8 @@ public class SocketInputStreamTest {
 		SocketInputStream inputStream = new SocketInputStream(new StringBufferInputStream(
 				"POST /api/mockTom HTTP/1.1\r\n"
 						+ "Host: hackr.jp\r\n" + "Accept: text/html,application/xml;\r\n"
-						+ "Connection: keep-alive"), 2048);
+						+ "Connection: keep-alive\r\n"
+						), 2048);
 		inputStream.readRequestLine(new HttpRequestLine());
 
 		HttpHeader header1 = new HttpHeader();
@@ -47,8 +48,6 @@ public class SocketInputStreamTest {
 
 		HttpHeader header3 = new HttpHeader();
 		inputStream.readHeader(header3);
-		System.out.println("name3" + new String(header3.name).trim());
-		System.out.println("value3" + new String(header3.value).trim());
 		assertTrue("connection:".equals(new String(header3.name).trim()));
 		assertTrue("keep-alive".equals(new String(header3.value).trim()));
 

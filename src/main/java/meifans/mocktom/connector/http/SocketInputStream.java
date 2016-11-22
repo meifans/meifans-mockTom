@@ -92,11 +92,8 @@ public class SocketInputStream extends InputStream {
 		boolean space = false;
 		while (!space) {
 			if (readCount >= maxRead) {
-				if ((2 * maxRead) <= HttpRequestLine.MAX_METHOD_SIZE) {
-					maxRead = resizeMethod(requestLine, maxRead);
-				} else {
-					throw new IOException(manager.getString("requestStream.readline.toolong"));
-				}
+				boolean resizeable = (2 * maxRead) <= HttpRequestLine.MAX_METHOD_SIZE;
+				maxRead = tryResize(requestLine, maxRead, resizeable);
 			}
 			tryFillBuff();
 			if (buf[pos] == SP) {
@@ -109,14 +106,16 @@ public class SocketInputStream extends InputStream {
 		requestLine.methodEnd = readCount - 1;
 	}
 
-	private void tryFillBuff() throws IOException {
-		if (pos >= count) {
-			int val = read();
-			if (val == -1) {
-				throw new IOException(manager.getString("requestStream.readline.error"));
-			}
-			pos = 0;
+	private int tryResize(HttpRequestLine requestLine, int maxRead, boolean resizeable) throws IOException {
+		if (resizeable) {
+			return resizeMethod(requestLine, maxRead);
+		} else {
+			throw new IOException(manager.getString("requestStream.readline.toolong"));
 		}
+	}
+
+	private void tryFillBuff() throws IOException {
+		checkBufferEnd();
 	}
 
 	private int resizeMethod(HttpRequestLine requestLine, int maxRead) {
@@ -133,11 +132,8 @@ public class SocketInputStream extends InputStream {
 		boolean space = false;
 		while (!space) {
 			if (readCount >= maxRead) {
-				if ((2 * maxRead) <= HttpRequestLine.MAX_URI_SIZE) {
-					maxRead = resizeUri(requestLine, maxRead);
-				} else {
-					throw new IOException(manager.getString("requestStream.readline.toolong"));
-				}
+				boolean resizeable = (2 * maxRead) <= HttpRequestLine.MAX_URI_SIZE;
+				maxRead = tryResize(requestLine, maxRead, resizeable);
 			}
 			tryFillBuff();
 
@@ -155,13 +151,6 @@ public class SocketInputStream extends InputStream {
 		requestLine.uriEnd = readCount - 1;
 	}
 
-	private int resizeUri(HttpRequestLine requestLine, int maxRead) {
-		char[] newBuffer = new char[2 * maxRead];
-		System.arraycopy(requestLine.uri, 0, newBuffer, 0, maxRead);
-		requestLine.uri = newBuffer;
-		maxRead = requestLine.uri.length;
-		return maxRead;
-	}
 
 	private void readProtocol(HttpRequestLine requestLine) throws IOException {
 		int maxRead = requestLine.protocol.length;
@@ -216,8 +205,9 @@ public class SocketInputStream extends InputStream {
 		// Checking for a blank line
 		int chr = read();
 		if ((chr == CR) || (chr == LF)) { // Skipping CR
-			if (chr == CR)
-				read(); // Skipping LF
+			if (chr == CR) {
+				read(); // Skipping LF}
+			}
 			header.nameEnd = 0;
 			header.valueEnd = 0;
 			return;
@@ -225,16 +215,12 @@ public class SocketInputStream extends InputStream {
 			pos--;
 		}
 
-		// Reading the header name
-
 		int maxRead = header.name.length;
-		int readStart = pos;
 		int readCount = 0;
 
 		boolean colon = false;
 
 		while (!colon) {
-			// if the buffer is full, extend it
 			if (readCount >= maxRead) {
 				if ((2 * maxRead) <= HttpHeader.MAX_NAME_SIZE) {
 					char[] newBuffer = new char[2 * maxRead];
@@ -246,7 +232,6 @@ public class SocketInputStream extends InputStream {
 							(manager.getString("requestStream.readline.toolong"));
 				}
 			}
-			// We're at the end of the internal buffer
 			if (pos >= count) {
 				int val = read();
 				if (val == -1) {
@@ -254,7 +239,6 @@ public class SocketInputStream extends InputStream {
 							(manager.getString("requestStream.readline.error"));
 				}
 				pos = 0;
-				readStart = 0;
 			}
 			if (buf[pos] == COLON) {
 				colon = true;
@@ -273,33 +257,15 @@ public class SocketInputStream extends InputStream {
 		// Reading the header value (which can be spanned over multiple lines)
 
 		maxRead = header.value.length;
-		readStart = pos;
 		readCount = 0;
-
-		int crPos = -2;
 
 		boolean eol = false;
 		boolean validLine = true;
 
 		while (validLine) {
-
 			boolean space = true;
-
-			// Skipping spaces
-			// Note : Only leading white spaces are removed. Trailing white
-			// spaces are not.
 			while (space) {
-				// We're at the end of the internal buffer
-				if (pos >= count) {
-					// Copying part (or all) of the internal buffer to the line
-					// buffer
-					int val = read();
-					if (val == -1)
-						throw new IOException
-								(manager.getString("requestStream.readline.error"));
-					pos = 0;
-					readStart = 0;
-				}
+				checkBufferEnd();
 				if ((buf[pos] == SP) || (buf[pos] == HT)) {
 					pos++;
 				} else {
@@ -308,30 +274,15 @@ public class SocketInputStream extends InputStream {
 			}
 
 			while (!eol) {
-				// if the buffer is full, extend it
 				if (readCount >= maxRead) {
 					if ((2 * maxRead) <= HttpHeader.MAX_VALUE_SIZE) {
-						char[] newBuffer = new char[2 * maxRead];
-						System.arraycopy(header.value, 0, newBuffer, 0,
-								maxRead);
-						header.value = newBuffer;
-						maxRead = header.value.length;
+						maxRead = resizeHeader(header, maxRead);
 					} else {
 						throw new IOException
 								(manager.getString("requestStream.readline.toolong"));
 					}
 				}
-				// We're at the end of the internal buffer
-				if (pos >= count) {
-					// Copying part (or all) of the internal buffer to the line
-					// buffer
-					int val = read();
-					if (val == -1)
-						throw new IOException
-								(manager.getString("requestStream.readline.error"));
-					pos = 0;
-					readStart = 0;
-				}
+				checkBufferEnd();
 				if (buf[pos] == CR) {
 				} else if (buf[pos] == LF) {
 					eol = true;
@@ -351,14 +302,9 @@ public class SocketInputStream extends InputStream {
 				validLine = false;
 			} else {
 				eol = false;
-				// if the buffer is full, extend it
 				if (readCount >= maxRead) {
 					if ((2 * maxRead) <= HttpHeader.MAX_VALUE_SIZE) {
-						char[] newBuffer = new char[2 * maxRead];
-						System.arraycopy(header.value, 0, newBuffer, 0,
-								maxRead);
-						header.value = newBuffer;
-						maxRead = header.value.length;
+						maxRead = resizeHeader(header, maxRead);
 					} else {
 						throw new IOException
 								(manager.getString("requestStream.readline.toolong"));
@@ -367,11 +313,30 @@ public class SocketInputStream extends InputStream {
 				header.value[readCount] = ' ';
 				readCount++;
 			}
-
 		}
-
 		header.valueEnd = readCount;
 
+	}
+
+	private int resizeHeader(HttpHeader header, int maxRead) {
+		char[] newBuffer = new char[2 * maxRead];
+		System.arraycopy(header.value, 0, newBuffer, 0,
+				maxRead);
+		header.value = newBuffer;
+		maxRead = header.value.length;
+		return maxRead;
+	}
+
+	private void checkBufferEnd() throws IOException {
+		if (pos >= count) {
+			// Copying part (or all) of the internal buffer to the line
+			// buffer
+			int val = read();
+			if (val == -1)
+				throw new IOException
+						(manager.getString("requestStream.readline.error"));
+			pos = 0;
+		}
 	}
 
 }

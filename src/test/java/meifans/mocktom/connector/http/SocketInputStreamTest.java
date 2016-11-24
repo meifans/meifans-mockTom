@@ -27,6 +27,20 @@ public class SocketInputStreamTest {
 	}
 
 	@Test
+	public void testReadRequestLine_resize() throws IOException {
+		HttpRequestLine requestLine = new HttpRequestLine();
+		SocketInputStream inputStream = new SocketInputStream(new StringBufferInputStream(
+				"POSTPOSTPOSTPOST /api/mockTom HTTP/1.1\r\n!"), 2048);
+		inputStream.readRequestLine(requestLine);
+
+		assertTrue("POSTPOSTPOSTPOST".equals(new String(requestLine.method).trim()));
+		assertTrue("HTTP/1.1".equals(new String(requestLine.protocol).trim()));
+		assertTrue("/api/mockTom".equals(new String(requestLine.uri).trim()));
+	}
+
+
+
+	@Test
 	public void testReadHeader() throws IOException {
 
 		SocketInputStream inputStream = new SocketInputStream(new StringBufferInputStream(

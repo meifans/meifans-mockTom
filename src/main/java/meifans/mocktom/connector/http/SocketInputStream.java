@@ -2,10 +2,10 @@ package meifans.mocktom.connector.http;
 
 import org.apache.tomcat.util.buf.Constants;
 import org.apache.tomcat.util.res.StringManager;
-
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.function.Consumer;
 
 /**
  * prase input stream to requestLine
@@ -86,14 +86,16 @@ public class SocketInputStream extends InputStream {
 		pos--;
 	}
 
-	private void readMethodName(HttpRequestLine requestLine) throws IOException {
+	private void readMethodName(final HttpRequestLine requestLine) throws IOException {
+
 		int maxRead = requestLine.method.length;
 		int readCount = 0;
 		boolean space = false;
 		while (!space) {
 			if (readCount >= maxRead) {
 				boolean resizeable = (2 * maxRead) <= HttpRequestLine.MAX_METHOD_SIZE;
-				maxRead = tryResize(requestLine, maxRead, resizeable);
+				tryResize(this::resizeMethod, requestLine, resizeable);
+				System.out.println("resize");
 			}
 			tryFillBuff();
 			if (buf[pos] == SP) {
@@ -106,19 +108,22 @@ public class SocketInputStream extends InputStream {
 		requestLine.methodEnd = readCount - 1;
 	}
 
-	private int tryResize(HttpRequestLine requestLine, int maxRead, boolean resizeable) throws IOException {
+	private void tryResize(Consumer<HttpRequestLine> resize, HttpRequestLine line,
+			boolean resizeable) throws IOException {
 		if (resizeable) {
-			return resizeMethod(requestLine, maxRead);
+			resize.accept(line);
 		} else {
 			throw new IOException(manager.getString("requestStream.readline.toolong"));
 		}
+
 	}
 
 	private void tryFillBuff() throws IOException {
 		checkBufferEnd();
 	}
 
-	private int resizeMethod(HttpRequestLine requestLine, int maxRead) {
+	private int resizeMethod(HttpRequestLine requestLine) {
+		int maxRead = requestLine.method.length;
 		char[] newBuffer = new char[2 * maxRead];
 		System.arraycopy(requestLine.method, 0, newBuffer, 0, maxRead);
 		requestLine.method = newBuffer;
@@ -133,7 +138,7 @@ public class SocketInputStream extends InputStream {
 		while (!space) {
 			if (readCount >= maxRead) {
 				boolean resizeable = (2 * maxRead) <= HttpRequestLine.MAX_URI_SIZE;
-				maxRead = tryResize(requestLine, maxRead, resizeable);
+				tryResize(this::resizeUri, requestLine, resizeable);
 			}
 			tryFillBuff();
 
@@ -151,6 +156,14 @@ public class SocketInputStream extends InputStream {
 		requestLine.uriEnd = readCount - 1;
 	}
 
+	private int resizeUri(HttpRequestLine requestLine) {
+		int maxRead = requestLine.uri.length;
+		char[] newBuffer = new char[2 * maxRead];
+		System.arraycopy(requestLine.uri, 0, newBuffer, 0, maxRead);
+		requestLine.uri = newBuffer;
+		maxRead = requestLine.uri.length;
+		return maxRead;
+	}
 
 	private void readProtocol(HttpRequestLine requestLine) throws IOException {
 		int maxRead = requestLine.protocol.length;
@@ -158,12 +171,10 @@ public class SocketInputStream extends InputStream {
 		boolean space = false;
 		while (!space) {
 			if (readCount >= maxRead) {
-				if ((2 * maxRead) <= HttpRequestLine.MAX_PROTOCOL_SIZE) {
-					maxRead = resizeProtocol(requestLine, maxRead);
-				} else {
-					throw new IOException(manager.getString("requestStream.readline.toolong"));
-				}
+				boolean resizeable = (2 * maxRead) <= HttpRequestLine.MAX_PROTOCOL_SIZE;
+				tryResize(this::resizeProtocol, requestLine, resizeable);
 			}
+
 			tryFillBuff();
 
 			if (buf[pos] == CR) {
@@ -180,7 +191,8 @@ public class SocketInputStream extends InputStream {
 		requestLine.protocolEnd = readCount;
 	}
 
-	private int resizeProtocol(HttpRequestLine requestLine, int maxRead) {
+	private int resizeProtocol(HttpRequestLine requestLine) {
+		int maxRead = requestLine.protocol.length;
 		char[] newBuffer = new char[2 * maxRead];
 		System.arraycopy(requestLine.protocol, 0, newBuffer, 0, maxRead);
 		requestLine.protocol = newBuffer;

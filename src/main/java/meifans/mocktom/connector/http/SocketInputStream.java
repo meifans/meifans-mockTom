@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import static javax.swing.text.html.HTML.Tag.HEAD;
+
 /**
  * prase input stream to requestLine
  *
@@ -24,6 +26,7 @@ public class SocketInputStream extends InputStream {
     private static final byte LC_OFFSET = (byte) 'A' - 'a';
     protected static StringManager manager = StringManager.getManager(Constants.Package);
     protected byte buf[];
+
 
     /** last valid byte */
     protected int count;
@@ -58,9 +61,11 @@ public class SocketInputStream extends InputStream {
      * Do NOT attempt to read the request body using it.
      * e.g. POST /api/mockTom HTTP/1.1 //TODO DELETE
      *
-     * @param requestLine Request line object
+     * @param requestLine Request line object <<<<<<< HEAD
      * @throws IOException If an exception occurs during the underlying socket read operations, or if the given buffer
-     *                     is not big enough to accomodate the whole line.
+     *                     is not big enough to accomodate the whole line. =======
+     * @throws IOException If an exception occurs during the underlying socket read operations, or if the given buffer
+     *                     is not big enough to accomodate the whole line. >>>>>>> 0b8df34fd45c03f9f295838095e708d6cdead888
      */
     public void readRequestLine(HttpRequestLine requestLine) throws IOException {
         if (requestLine.methodEnd != 0) {
@@ -96,6 +101,7 @@ public class SocketInputStream extends InputStream {
             if (readCount >= maxRead) {
                 boolean resizeable = (2 * maxRead) <= HttpRequestLine.MAX_METHOD_SIZE;
                 tryResize(this::resizeMethod, requestLine, resizeable);
+
             }
             tryFillBuff();
             if (buf[pos] == SP) {
@@ -121,6 +127,7 @@ public class SocketInputStream extends InputStream {
     private void tryFillBuff() throws IOException {
         checkBufferEnd();
     }
+
 
     private void resizeMethod(HttpRequestLine line) {
         line.method = Arrays.copyOf(line.method, 2 * line.method.length);
@@ -151,8 +158,10 @@ public class SocketInputStream extends InputStream {
         requestLine.uriEnd = readCount - 1;
     }
 
+
     private void resizeUri(HttpRequestLine line) {
         line.uri = Arrays.copyOf(line.uri, 2 * line.uri.length);
+
     }
 
     private void readProtocol(HttpRequestLine requestLine) throws IOException {
@@ -163,9 +172,7 @@ public class SocketInputStream extends InputStream {
             if (readCount >= maxRead) {
                 boolean resizeable = (2 * maxRead) <= HttpRequestLine.MAX_PROTOCOL_SIZE;
                 tryResize(this::resizeProtocol, requestLine, resizeable);
-
             }
-
             tryFillBuff();
 
             if (buf[pos] == CR) {
@@ -182,8 +189,10 @@ public class SocketInputStream extends InputStream {
         requestLine.protocolEnd = readCount;
     }
 
+
     private void resizeProtocol(HttpRequestLine line) {
         line.protocol = Arrays.copyOf(line.protocol, 2 * line.protocol.length);
+
     }
 
     /**
@@ -191,10 +200,13 @@ public class SocketInputStream extends InputStream {
      * function is meant to be used during the HTTP request header parsing.
      * remember invoking readRequestLine before invoking this.
      *
-     * @param header Request header object
+     * @param header Request header object <<<<<<< HEAD
      * @throws IOException If an exception occurs during the underlying socket read operations, or if the given buffer
-     *                     is not big enough to accomodate the whole line.
+     *                     is not big enough to accomodate the whole line. =======
+     * @throws IOException If an exception occurs during the underlying socket read operations, or if the given buffer
+     *                     is not big enough to accomodate the whole line. >>>>>>> 0b8df34fd45c03f9f295838095e708d6cdead888
      */
+
     public void readHeader(HttpHeader header) throws IOException {
         if (header.nameEnd != 0)
             header.recycle();
@@ -221,6 +233,7 @@ public class SocketInputStream extends InputStream {
             if (readCount >= maxRead) {
                 if ((2 * maxRead) <= HttpHeader.MAX_NAME_SIZE) {
                     header.name = Arrays.copyOf(header.name, 2 * header.name.length);
+
                     maxRead = header.name.length;
                 } else {
                     throw new IOException
@@ -315,6 +328,7 @@ public class SocketInputStream extends InputStream {
 
     private int resizeHeader(HttpHeader header, int maxRead) {
         header.value = Arrays.copyOf(header.value, 2 * header.value.length);
+
         maxRead = header.value.length;
         return maxRead;
     }

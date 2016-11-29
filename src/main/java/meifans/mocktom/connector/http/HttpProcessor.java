@@ -1,15 +1,17 @@
 package meifans.mocktom.connector.http;
 
-import meifans.mocktom.container.ServletProcessor;
-import meifans.mocktom.container.StaticResourceProcessor;
-import meifans.mocktom.util.RequestUtil;
 import org.apache.tomcat.util.res.StringManager;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+
+import meifans.mocktom.container.ServletProcessor;
+import meifans.mocktom.container.StaticResourceProcessor;
+import meifans.mocktom.util.RequestUtil;
 
 public class HttpProcessor {
 
@@ -28,8 +30,8 @@ public class HttpProcessor {
     }
 
     public void process(Socket socket) {
-        SocketInputStream input = null;
-        OutputStream output = null;
+        SocketInputStream input ;
+        OutputStream output;
         try {
             // read 方法重载没有完成
             // 取得输入输出流
@@ -165,9 +167,8 @@ public class HttpProcessor {
         String normalized = path;
         // Prevent encoding '%', '/', '.' and '\', which are special reserved
         // characters
-        if ((normalized.indexOf("%25") >= 0) || (normalized.indexOf("%2F") >= 0) || (normalized.indexOf("%2E") >= 0)
-                || (normalized.indexOf("%5C") >= 0) || (normalized.indexOf("%2f") >= 0) || (normalized.indexOf("%2e")
-                >= 0) || (normalized.indexOf("%5c") >= 0)) {
+        if ((normalized.contains("%25")) || (normalized.contains("%2F")) || (normalized.contains("%2E"))
+                || (normalized.contains("%5C")) || (normalized.contains("%2f")) || (normalized.contains("%2e")) || (normalized.contains("%5c"))) {
             return null;
         }
         if (normalized.startsWith("/%7E") || normalized.startsWith("/%7e"))

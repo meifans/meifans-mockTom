@@ -5,8 +5,10 @@ package meifans.meifans_mockTom;
  */
 public class Test {
 
-	public static void main(String[] args) {
-		byte[] b=new byte[26];
-		System.out.println(b[2]);
-	}
+  public static void main(String[] args) {
+    byte[] b = new byte[26];
+    System.out.println(b[2]);
+
+
+  }
 }

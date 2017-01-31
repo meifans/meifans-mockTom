@@ -8,7 +8,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 /**
- * to test httpServer
+ * to test httpServer.
  *
  * @author meifans
  */
@@ -16,6 +16,7 @@ public class PrimitiveServlet implements Servlet {
 
   public void destroy() {
     System.out.println("come into bomb ,bomb,bomb!!!");
+    System.out.println();
   }
 
   public ServletConfig getServletConfig() {
